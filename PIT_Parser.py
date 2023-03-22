@@ -9,6 +9,11 @@ PIT_PARTITION_SIZE = 132
 PIT_HEADER_FORMAT = '<II4s4s4s4s'
 PIT_PARTITION_FORMAT = '<III4s4sIIII32s32s32s'
 
+class InvalidMagicException(Exception):
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
+
 class PIT_Parser(object):
     def __init__(self, pit_file) -> None:
         self.PIT_MAGIC = PIT_MAGIC
@@ -30,8 +35,7 @@ class PIT_Parser(object):
         # Check magic number
         magic_number = header[0]
         if magic_number != PIT_MAGIC:
-            print("Invalid PIT magic number!")
-            exit(1)
+            raise InvalidMagicException("Invalid PIT magic number!")
 
         # Extract partitions
         partitionsNum = header[1]
