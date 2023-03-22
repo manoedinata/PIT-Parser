@@ -1,3 +1,4 @@
+import os
 import struct
 import json
 
@@ -34,6 +35,7 @@ class PIT_Parser(object):
 
         # Extract partitions
         partitionsNum = header[1]
+        firmwareVersion = ""
 
         for i in range(partitionsNum + 1):
             file.seek(24 + PIT_PARTITION_SIZE * i, 0)
@@ -43,12 +45,22 @@ class PIT_Parser(object):
 
             partition = struct.unpack(PIT_PARTITION_FORMAT, partitionByte)
             
+            identifier = partition[2]
             partitionName = partition[9].decode("ascii").replace("\0", "")
             flashName = partition[10].decode("ascii").replace("\0", "")
             if not flashName or flashName == "-":
                 flashName = None
 
+            # Get firmware version from partitionsNum + 1
+            # In the last loop, i = partitionsNum
+            # i + 1 > partitionsNum, so it means the partitions part is over
+            # and it's firmware version part
+            if i + 1 > partitionsNum:
+                firmwareVersion = partitionName
+                continue
+
             self.partitions.append({
+                "identifier": identifier,
                 "partition_name": partitionName,
                 "flash_name": flashName,
             })
@@ -56,6 +68,8 @@ class PIT_Parser(object):
         file.close()
 
         data = {
+            "file_name": os.path.basename(file.name),
+            "firmware_version": firmwareVersion,
             "partitions": self.partitions,
         }
         return json.dumps(data, indent=4)
