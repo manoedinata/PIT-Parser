@@ -1,1 +1,1 @@
-from samsungpitparser.PITParser import PITParser
+from samsungpitparser.PIT_Parser import PITParser

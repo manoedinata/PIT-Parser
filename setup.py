@@ -17,6 +17,13 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
     ],
-    install_requires=[],
+    entry_points={
+        "console_scripts": [
+            "samsungpitparser = samsungpitparser.main:main",
+        ],
+    },
+    install_requires=[
+        "tabulate"
+    ],
     python_requires='>=3.6',
 )
