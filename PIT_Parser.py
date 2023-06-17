@@ -4,14 +4,34 @@ import json
 
 # Definitions
 PIT_MAGIC = 305436790
-PIT_HEADER_SIZE = 24
+PIT_HEADER_SIZE = 28
 PIT_PARTITION_SIZE = 132
-PIT_HEADER_FORMAT = '<II4s4s4s4s'
-PIT_PARTITION_FORMAT = '<III4s4sIIII32s32s32s'
+
+# Struct format
+PIT_HEADER_FORMAT = "<"
+PIT_HEADER_FORMAT += "I" # Magic
+PIT_HEADER_FORMAT += "I" # Entry count
+PIT_HEADER_FORMAT += "8s" # Unknown string
+PIT_HEADER_FORMAT += "8s" # CPU/bootloader tag
+PIT_HEADER_FORMAT += "I" # Logical unit count
+
+PIT_PARTITION_FORMAT = "<"
+PIT_PARTITION_FORMAT += "I" # Binary type
+PIT_PARTITION_FORMAT += "I" # device type
+PIT_PARTITION_FORMAT += "I" # Identifier
+PIT_PARTITION_FORMAT += "I" # Attributes
+PIT_PARTITION_FORMAT += "I" # Update attributes
+PIT_PARTITION_FORMAT += "I" # Partition block size/offset
+PIT_PARTITION_FORMAT += "I" # Partition block count
+PIT_PARTITION_FORMAT += "I" # File offset (obsolete)
+PIT_PARTITION_FORMAT += "I" # File size (obsolete)
+PIT_PARTITION_FORMAT += "32s" # Partition name
+PIT_PARTITION_FORMAT += "32s" # Flash file name
+PIT_PARTITION_FORMAT += '32s' # FOTA file name
 
 class InvalidMagicException(Exception):
-    def __init__(self, message):
-        self.message = message
+    def __init__(self):
+        self.message = "Invalid PIT magic number"
         super().__init__(self.message)
 
 class PIT_Parser(object):
@@ -23,6 +43,7 @@ class PIT_Parser(object):
         self.PIT_PARTITION_FORMAT = PIT_PARTITION_FORMAT
 
         self.pit_file = pit_file
+        self.header = {}
         self.partitions = []
 
     def load_pit(self):
@@ -35,14 +56,23 @@ class PIT_Parser(object):
         # Check magic number
         magic_number = header[0]
         if magic_number != PIT_MAGIC:
-            raise InvalidMagicException("Invalid PIT magic number!")
+            raise InvalidMagicException
+
+        # Header
+        self.header = {
+            "magic_number": magic_number,
+            "unknown_string": header[2].decode("ascii").replace("\0", ""),
+            "cpu_bl_tag": header[3].decode("ascii").replace("\0", ""),
+            "lu_count": header[4],
+        }
 
         # Extract partitions
         partitionsNum = header[1]
-        firmwareVersion = ""
 
-        for i in range(partitionsNum + 1):
-            file.seek(24 + PIT_PARTITION_SIZE * i, 0)
+        for i in range(partitionsNum):
+            fileSeek = PIT_HEADER_SIZE + PIT_PARTITION_SIZE * i
+            file.seek(fileSeek, 0)
+
             partitionByte = file.read(PIT_PARTITION_SIZE)
             if not partitionByte:
                 continue
@@ -55,14 +85,6 @@ class PIT_Parser(object):
             if not flashName or flashName == "-":
                 flashName = None
 
-            # Get firmware version from partitionsNum + 1
-            # In the last loop, i = partitionsNum
-            # i + 1 > partitionsNum, so it means the partitions part is over
-            # and it's firmware version part
-            if i + 1 > partitionsNum:
-                firmwareVersion = partitionName
-                continue
-
             self.partitions.append({
                 "identifier": identifier,
                 "partition_name": partitionName,
@@ -73,7 +95,7 @@ class PIT_Parser(object):
 
         data = {
             "file_name": os.path.basename(file.name),
-            "firmware_version": firmwareVersion,
+            "header": self.header,
             "partitions": self.partitions,
         }
         return json.dumps(data, indent=4)

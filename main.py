@@ -1,6 +1,7 @@
 from PIT_Parser import PIT_Parser
+import sys
 
-parser = PIT_Parser("./J400F_J4LTE_MEA_OPEN.pit")
+parser = PIT_Parser(sys.argv[1])
 partitions = parser.load_pit()
 
 print(partitions)
