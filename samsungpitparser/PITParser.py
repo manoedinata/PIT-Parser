@@ -34,7 +34,7 @@ class InvalidMagicException(Exception):
         self.message = "Invalid PIT magic number"
         super().__init__(self.message)
 
-class PIT_Parser(object):
+class PITParser(object):
     def __init__(self, pit_file) -> None:
         self.PIT_MAGIC = PIT_MAGIC
         self.PIT_HEADER_SIZE = PIT_HEADER_SIZE
