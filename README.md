@@ -2,8 +2,15 @@
 
 Read & parse Samsung phone' PIT files.
 
+## Installation
+
+```bash
+$ pip3 install git+https://github.com/manoedinata/SamsungPITParser
+```
+
 ## Usage
 
+* As library:
 ```py3
 from samsungpitparser import PITParser
 
@@ -12,6 +19,12 @@ parser.load_pit()
 
 partitions = parser.partitions
 print(partitions)
+```
+
+* As command line tools (executable):
+```bash
+$ samsungpitparser -i path/to/.pit
+# Add "-l" or "--long" to display more detailed PIT information
 ```
 
 ## Credits
