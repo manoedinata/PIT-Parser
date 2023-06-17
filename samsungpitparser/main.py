@@ -5,6 +5,7 @@ from . import PITParser
 def init_args():
     parser = ArgumentParser(description="Read & parse Samsung phone' PIT files.")
     parser.add_argument("-i", "--input", help="PIT file", required=True)
+    parser.add_argument("-l", "--long", help="Show long, detailed PIT information", action="store_true", required=False)
 
     # Parse arguments
     args = parser.parse_args()
@@ -17,14 +18,24 @@ def main():
     parser = PITParser(args.input)
     parse_result = parser.load_pit()
 
-    table_data = [
-        ["Binary Type", "Device Type", "ID", "Attributes", "Update Attributes", "Block Size/Offset", "Block Count", "File Offset", "File Size", "Partition Name", "Flash Name", "FOTA Name"]
-    ]
+    if not args.long:
+        table_data = [
+            ["ID", "Partition Name", "Flash Name"]
+        ]
+    else:
+        table_data = [
+            ["Binary Type", "Device Type", "ID", "Attributes", "Update Attributes", "Block Size/Offset", "Block Count", "File Offset", "File Size", "Partition Name", "Flash Name", "FOTA Name"]
+        ]
 
     for partition in parse_result["partitions"]:
-        table_data.append(
-            [partition[key] if partition[key] else "-" for key in partition]
-        )
+        if not args.long:
+            table_data.append(
+                [partition["identifier"], partition["partition_name"], partition["flash_filename"] if partition["flash_filename"] else "-"]
+            )
+        else:
+            table_data.append(
+                [partition[key] if partition[key] else "-" for key in partition]
+            )
 
     table = tabulate(table_data, headers="firstrow", tablefmt="grid")
     print(table)

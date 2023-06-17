@@ -88,7 +88,7 @@ class PITParser(object):
                 "block_count": partition[6],
                 "file_offset": partition[7],
                 "file_size": partition[8],
-                "partitionName": partition[9].decode("ascii").replace("\0", ""),
+                "partition_name": partition[9].decode("ascii").replace("\0", ""),
                 "flash_filename": partition[10].decode("ascii").replace("\0", "") if partition[10] and partition[10] != "-" else None,
                 "fota_filename": partition[11].decode("ascii").replace("\0", "") if partition[11] and partition[11] != "-" else None
             })

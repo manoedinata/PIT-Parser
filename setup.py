@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="SamsungPITParser",
-    version="0.1",
+    version="0.2",
     author="Hendra Manudinata",
     author_email="manoedinata@gmail.com",
     description="Read & parse Samsung phone' PIT files",
