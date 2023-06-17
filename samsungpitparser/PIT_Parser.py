@@ -77,17 +77,20 @@ class PITParser(object):
                 continue
 
             partition = struct.unpack(PIT_PARTITION_FORMAT, partitionByte)
-            
-            identifier = partition[2]
-            partitionName = partition[9].decode("ascii").replace("\0", "")
-            flashName = partition[10].decode("ascii").replace("\0", "")
-            if not flashName or flashName == "-":
-                flashName = None
 
             self.partitions.append({
-                "identifier": identifier,
-                "partition_name": partitionName,
-                "flash_name": flashName,
+                "binary_type": partition[0],
+                "device_type": partition[1],
+                "identifier": partition[2],
+                "attributes": partition[3],
+                "update_attributes": partition[4],
+                "block_size": partition[5],
+                "block_count": partition[6],
+                "file_offset": partition[7],
+                "file_size": partition[8],
+                "partitionName": partition[9].decode("ascii").replace("\0", ""),
+                "flash_filename": partition[10].decode("ascii").replace("\0", "") if partition[10] and partition[10] != "-" else None,
+                "fota_filename": partition[11].decode("ascii").replace("\0", "") if partition[11] and partition[11] != "-" else None
             })
 
         file.close()

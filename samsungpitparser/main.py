@@ -18,8 +18,9 @@ def main():
     parse_result = parser.load_pit()
 
     table_data = [
-        ["ID", "Partition Name", "Flash Name"]
+        ["Binary Type", "Device Type", "ID", "Attributes", "Update Attributes", "Block Size/Offset", "Block Count", "File Offset", "File Size", "Partition Name", "Flash Name", "FOTA Name"]
     ]
+
     for partition in parse_result["partitions"]:
         table_data.append(
             [partition[key] if partition[key] else "-" for key in partition]
