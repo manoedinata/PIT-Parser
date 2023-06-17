@@ -1,6 +1,5 @@
 import os
 import struct
-import json
 
 # Definitions
 PIT_MAGIC = 305436790
@@ -98,4 +97,4 @@ class PITParser(object):
             "header": self.header,
             "partitions": self.partitions,
         }
-        return json.dumps(data, indent=4)
+        return data
